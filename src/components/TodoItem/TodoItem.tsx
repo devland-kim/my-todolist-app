@@ -1,5 +1,8 @@
+// src/components/TodoItem/TodoItem.tsx
 import React from "react";
-import "./TodoItem.css"; // 간단한 스타일링을 위해 CSS 파일 사용
+// MUI 컴포넌트 및 아이콘 임포트
+import { ListItem, Checkbox, IconButton, ListItemText } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete"; // 삭제 아이콘
 
 export interface Todo {
   id: string;
@@ -18,23 +21,45 @@ export const TodoItem: React.FC<TodoItemProps> = ({
   onToggle,
   onDelete,
 }) => {
+  const labelId = `checkbox-list-label-${todo.id}`;
+
   return (
-    <li className={`TodoItem ${todo.completed ? "completed" : ""}`}>
-      <input
-        type="checkbox"
+    <ListItem
+      secondaryAction={
+        <IconButton
+          edge="end"
+          aria-label={`Delete ${todo.text}`}
+          onClick={() => onDelete(todo.id)}
+          title={`Delete ${todo.text}`}
+        >
+          <DeleteIcon />
+        </IconButton>
+      }
+      disablePadding
+    >
+      <Checkbox
+        edge="start"
         checked={todo.completed}
+        tabIndex={-1}
+        disableRipple
         onChange={() => onToggle(todo.id)}
-        aria-label={`Mark ${todo.text} as ${
-          todo.completed ? "incomplete" : "complete"
-        }`}
+        sx={{ ml: 0.5 }}
+        slotProps={{
+          input: {
+            "aria-labelledby": labelId,
+          },
+        }}
       />
-      <span className="text">{todo.text}</span>
-      <button
-        onClick={() => onDelete(todo.id)}
-        aria-label={`Delete ${todo.text}`}
-      >
-        X
-      </button>
-    </li>
+      <ListItemText
+        id={labelId}
+        primary={todo.text}
+        sx={{
+          textDecoration: todo.completed ? "line-through" : "none",
+          color: todo.completed ? "text.disabled" : "text.primary",
+          pr: 5,
+          wordBreak: "break-word",
+        }}
+      />
+    </ListItem>
   );
 };

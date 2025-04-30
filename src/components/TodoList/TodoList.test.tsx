@@ -12,7 +12,7 @@ describe("TodoList", () => {
     { id: "2", text: "Second Todo", completed: true },
   ];
 
-  it("renders a list of TodoItems", () => {
+  it("투두리스트 아이템 렌더링", () => {
     render(
       <TodoList
         todos={sampleTodos}
@@ -26,12 +26,11 @@ describe("TodoList", () => {
     expect(screen.getByText("Second Todo")).toBeInTheDocument();
   });
 
-  it("renders empty message when there are no todos", () => {
+  it("리스트 아이템 없을 때 확인", () => {
     render(<TodoList todos={[]} onToggle={mockToggle} onDelete={mockDelete} />);
-    expect(screen.getByText("No todos yet!")).toBeInTheDocument();
+    expect(
+      screen.getByText(/No todos yet! Add one above./i)
+    ).toBeInTheDocument();
     expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
   });
-
-  // TodoItem의 onToggle/onDelete 호출은 TodoItem 테스트에서 확인했으므로,
-  // 여기서는 리스트 렌더링에 집중합니다. 필요하다면 상호작용 테스트도 추가 가능.
 });

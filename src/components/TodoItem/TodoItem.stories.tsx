@@ -1,21 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { TodoItem, Todo } from "./TodoItem";
-import { fn } from "@storybook/test"; // Storybook v8+
-// import { action } from '@storybook/addon-actions'; // Storybook v7
+import { expect, fn, userEvent } from "@storybook/test"; // Storybook v8+ mock function
+import { within } from "@testing-library/react";
 
 const meta: Meta<typeof TodoItem> = {
   title: "Components/TodoItem",
   component: TodoItem,
-  tags: ["autodocs"], // 자동 문서 생성
+  tags: ["autodocs"],
   argTypes: {
-    // Props 타입 및 컨트롤 정의 (선택 사항)
     todo: { control: "object" },
-    onToggle: { action: "toggled" }, // Storybook UI에서 액션 로깅
+    onToggle: { action: "toggled" },
     onDelete: { action: "deleted" },
   },
-  // fn() 또는 action()을 사용하여 mock 함수 전달
   args: {
-    // Storybook v8+ 스타일
     onToggle: fn(),
     onDelete: fn(),
   },
@@ -34,13 +31,33 @@ export const Default: Story = {
   args: {
     todo: defaultTodo,
   },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+
+    const checkbox = canvas.getByRole("checkbox", { name: /Learn Storybook/i });
+    await userEvent.click(checkbox);
+
+    await expect(args.onToggle).toHaveBeenCalledTimes(1);
+    await expect(args.onToggle).toHaveBeenCalledWith(defaultTodo.id);
+  },
 };
 
 export const Completed: Story = {
   args: {
     todo: {
       ...defaultTodo,
+      id: "2",
+      text: "Write Interaction Tests",
       completed: true,
     },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    const checkbox = canvas.getByRole("checkbox", {
+      name: /Write Interaction Tests/i,
+    });
+
+    await expect(checkbox).toBeChecked();
   },
 };

@@ -1,27 +1,48 @@
+// src/App.tsx
 import { AddTodoForm } from "./components/AddTodoForm/AddTodoForm";
 import { TodoList } from "./components/TodoList/TodoList";
-import { useTodos } from "./hooks/useTodos.ts";
-import "./App.css"; // 전역 스타일
+import { useTodos } from "./hooks/useTodos";
+// MUI 레이아웃 및 피드백 컴포넌트 임포트
+import {
+  Container,
+  Typography,
+  Box,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
 
 function App() {
   const { todos, isLoading, error, addTodo, toggleTodo, deleteTodo } =
     useTodos();
 
   return (
-    <div className="App">
-      <h1>Todo List</h1>
+    <Container maxWidth="sm" sx={{ mt: 4, mb: 4 }}>
+      {" "}
+      <Box sx={{ textAlign: "center", mb: 4 }}>
+        {" "}
+        <Typography variant="h3" component="h1" gutterBottom>
+          Todo List
+        </Typography>
+      </Box>
       <AddTodoForm onAddTodo={addTodo} />
-
-      {error && <p className="error-message">Error loading todos!</p>}
-      {isLoading && <p>Loading...</p>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Failed to load todos. Please try again later. ({String(error)})
+        </Alert>
+      )}
+      {isLoading && (
+        <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+          <CircularProgress />
+        </Box>
+      )}
       {!isLoading && !error && (
         <TodoList
-          todos={todos || []} // todos가 undefined일 경우 빈 배열 전달
+          todos={todos || []}
           onToggle={toggleTodo}
           onDelete={deleteTodo}
         />
       )}
-    </div>
+    </Container>
   );
 }
 

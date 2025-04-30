@@ -1,52 +1,63 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import userEvent from "@testing-library/user-event"; // More realistic user events
-import { describe, it, expect, vi } from "vitest";
+// src/components/AddTodoForm/AddTodoForm.test.tsx
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { AddTodoForm } from "./AddTodoForm";
+import "@testing-library/jest-dom/matchers";
 
 describe("AddTodoForm", () => {
   const mockAddTodo = vi.fn();
 
-  it("renders input field and add button", () => {
-    render(<AddTodoForm onAddTodo={mockAddTodo} />);
-    expect(
-      screen.getByPlaceholderText("What needs to be done?")
-    ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
+  beforeEach(() => {
+    mockAddTodo.mockClear();
   });
 
-  it("updates input value on change", async () => {
+  it("인풋, 버튼 렌더링", () => {
     render(<AddTodoForm onAddTodo={mockAddTodo} />);
-    const input = screen.getByPlaceholderText("What needs to be done?");
+    expect(
+      screen.getByLabelText(/what needs to be done\?/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /add todo/i })
+    ).toBeInTheDocument();
+  });
+
+  it("인풋 값 변경", async () => {
+    render(<AddTodoForm onAddTodo={mockAddTodo} />);
+    const input = screen.getByLabelText(/what needs to be done\?/i);
     await userEvent.type(input, "New Task");
     expect(input).toHaveValue("New Task");
   });
 
-  it("calls onAddTodo with trimmed text and clears input on submit", async () => {
+  it("인풋 공백 제거 및 버튼 클릭 시 인풋 클리어 확인", async () => {
     render(<AddTodoForm onAddTodo={mockAddTodo} />);
-    const input = screen.getByPlaceholderText("What needs to be done?");
-    const addButton = screen.getByRole("button", { name: /add/i });
+    const input = screen.getByLabelText(/what needs to be done\?/i);
+    const addButton = screen.getByRole("button", { name: /add todo/i });
+
+    expect(addButton).toBeDisabled();
 
     await userEvent.type(input, "  Important Task  ");
+    expect(addButton).toBeEnabled();
     await userEvent.click(addButton);
 
     expect(mockAddTodo).toHaveBeenCalledTimes(1);
     expect(mockAddTodo).toHaveBeenCalledWith("Important Task");
-    expect(input).toHaveValue(""); // Input should be cleared
+    expect(input).toHaveValue("");
+    expect(addButton).toBeDisabled();
   });
 
-  it("does not call onAddTodo if input is empty or only whitespace", async () => {
+  it("빈 값 버그 테스트", async () => {
     render(<AddTodoForm onAddTodo={mockAddTodo} />);
-    const input = screen.getByPlaceholderText("What needs to be done?");
-    const addButton = screen.getByRole("button", { name: /add/i });
+    const input = screen.getByLabelText(/what needs to be done\?/i);
+    const addButton = screen.getByRole("button", { name: /add todo/i });
 
-    // Test empty input
-    await userEvent.click(addButton);
+    expect(input).toHaveValue("");
+    expect(addButton).toBeDisabled();
     expect(mockAddTodo).not.toHaveBeenCalled();
 
-    // Test whitespace input
     await userEvent.type(input, "   ");
-    await userEvent.click(addButton);
+    expect(input).toHaveValue("   ");
+    expect(addButton).toBeDisabled();
     expect(mockAddTodo).not.toHaveBeenCalled();
-    expect(input).toHaveValue("   "); // Input should retain whitespace if not submitted
   });
 });

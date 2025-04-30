@@ -1,5 +1,7 @@
+// src/components/AddTodoForm/AddTodoForm.tsx
 import React, { useState, FormEvent } from "react";
-import "./AddTodoForm.css";
+// MUI 컴포넌트 임포트
+import { TextField, Button, Box, Stack } from "@mui/material";
 
 interface AddTodoFormProps {
   onAddTodo: (text: string) => void;
@@ -10,22 +12,35 @@ export const AddTodoForm: React.FC<AddTodoFormProps> = ({ onAddTodo }) => {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (text.trim()) {
-      onAddTodo(text.trim());
-      setText(""); // 입력 필드 초기화
+    const trimmedText = text.trim();
+    if (trimmedText) {
+      onAddTodo(trimmedText);
+      setText("");
     }
   };
 
   return (
-    <form className="AddTodoForm" onSubmit={handleSubmit}>
-      <input
-        type="text"
-        placeholder="What needs to be done?"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        aria-label="New todo text"
-      />
-      <button type="submit">Add</button>
-    </form>
+    <Box component="form" onSubmit={handleSubmit} sx={{ mb: 3 }}>
+      {" "}
+      <Stack direction="row" spacing={1}>
+        <TextField
+          label="What needs to be done?" // placeholder 대신 label 사용
+          variant="outlined"
+          size="small"
+          fullWidth
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          aria-label="New todo text"
+        />
+        <Button
+          type="submit"
+          variant="contained"
+          disabled={!text.trim()}
+          sx={{ whiteSpace: "nowrap" }}
+        >
+          Add Todo
+        </Button>
+      </Stack>
+    </Box>
   );
 };

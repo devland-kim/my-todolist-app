@@ -35,6 +35,5 @@ export const Empty: Story = {
 };
 
 export const Loading: Story = {
-  // 로딩 상태 시뮬레이션 (추후 SWR과 연동)
   render: () => <p>Loading todos...</p>,
 };

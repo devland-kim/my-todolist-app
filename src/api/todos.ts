@@ -1,21 +1,18 @@
 import { Todo } from "../components/TodoItem/TodoItem";
 
-// 간단한 인메모리 스토리지 (새로고침 시 초기화됨)
-// 좀 더 영속성을 원하면 localStorage 사용 가능
 let todos: Todo[] = [
   { id: "1", text: "Learn SWR", completed: false },
   { id: "2", text: "Integrate Chromatic", completed: true },
 ];
 
-// 인위적인 딜레이를 추가하여 네트워크 요청 시뮬레이션
 const simulateDelay = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 // GET /api/todos
 export const fetchTodos = async (): Promise<Todo[]> => {
-  await simulateDelay(500); // 0.5초 딜레이
+  await simulateDelay(500);
   console.log("API: Fetching todos");
-  return [...todos]; // 복사본 반환
+  return [...todos];
 };
 
 // POST /api/todos

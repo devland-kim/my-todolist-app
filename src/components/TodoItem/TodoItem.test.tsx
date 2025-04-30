@@ -1,61 +1,66 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
+// src/components/TodoItem/TodoItem.test.tsx
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { TodoItem, Todo } from "./TodoItem";
+import "@testing-library/jest-dom/matchers";
 
 describe("TodoItem", () => {
-  const mockTodo: Todo = { id: "1", text: "Test Todo", completed: false };
-  const mockToggle = vi.fn(); // Vitest의 mock 함수
+  const mockToggle = vi.fn();
   const mockDelete = vi.fn();
+  const mockTodo: Todo = {
+    id: "1",
+    text: "Test Todo",
+    completed: false,
+  };
 
-  it("renders the todo text", () => {
-    render(
-      <TodoItem todo={mockTodo} onToggle={mockToggle} onDelete={mockDelete} />
-    );
-    expect(screen.getByText("Test Todo")).toBeInTheDocument();
+  beforeEach(() => {
+    mockToggle.mockClear();
+    mockDelete.mockClear();
   });
 
-  it("checkbox is unchecked when todo is not completed", () => {
+  const renderComponent = (todo: Todo) => {
     render(
-      <TodoItem todo={mockTodo} onToggle={mockToggle} onDelete={mockDelete} />
+      <TodoItem todo={todo} onToggle={mockToggle} onDelete={mockDelete} />
     );
-    const checkbox = screen.getByRole("checkbox");
+  };
+
+  it("텍스트 렌더링", () => {
+    renderComponent(mockTodo);
+    expect(screen.getByText(mockTodo.text)).toBeInTheDocument();
+  });
+
+  it("선택안되어있는 체크박스 확인", () => {
+    renderComponent(mockTodo);
+    const checkbox = screen.getByRole("checkbox", { name: /test todo/i });
     expect(checkbox).not.toBeChecked();
+
+    const textElement = screen.getByText(mockTodo.text);
+    expect(textElement).not.toHaveStyle("text-decoration: line-through");
   });
 
-  it("checkbox is checked when todo is completed", () => {
+  it("체크박스 체크 확인", () => {
     const completedTodo = { ...mockTodo, completed: true };
-    render(
-      <TodoItem
-        todo={completedTodo}
-        onToggle={mockToggle}
-        onDelete={mockDelete}
-      />
-    );
-    const checkbox = screen.getByRole("checkbox");
+    renderComponent(completedTodo);
+    const checkbox = screen.getByRole("checkbox", { name: completedTodo.text });
     expect(checkbox).toBeChecked();
-    // completed 클래스가 적용되었는지 확인 (선택 사항)
-    expect(screen.getByRole("listitem")).toHaveClass("completed");
   });
 
-  it("calls onToggle with the correct id when checkbox is clicked", () => {
-    render(
-      <TodoItem todo={mockTodo} onToggle={mockToggle} onDelete={mockDelete} />
-    );
-    const checkbox = screen.getByRole("checkbox");
-    fireEvent.click(checkbox);
+  it("체크 박스 클릭 함수 동작 확인", async () => {
+    renderComponent(mockTodo);
+    const checkbox = screen.getByRole("checkbox", { name: mockTodo.text });
+    await userEvent.click(checkbox);
     expect(mockToggle).toHaveBeenCalledTimes(1);
-    expect(mockToggle).toHaveBeenCalledWith("1");
+    expect(mockToggle).toHaveBeenCalledWith(mockTodo.id);
   });
 
-  it("calls onDelete with the correct id when delete button is clicked", () => {
-    render(
-      <TodoItem todo={mockTodo} onToggle={mockToggle} onDelete={mockDelete} />
-    );
+  it("삭제 버튼 클릭 함수 동작 확인", async () => {
+    renderComponent(mockTodo);
     const deleteButton = screen.getByRole("button", {
-      name: /delete test todo/i,
+      name: `Delete ${mockTodo.text}`,
     });
-    fireEvent.click(deleteButton);
+    await userEvent.click(deleteButton);
     expect(mockDelete).toHaveBeenCalledTimes(1);
-    expect(mockDelete).toHaveBeenCalledWith("1");
+    expect(mockDelete).toHaveBeenCalledWith(mockTodo.id);
   });
 });
